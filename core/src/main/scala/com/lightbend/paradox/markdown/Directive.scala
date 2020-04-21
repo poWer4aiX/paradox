@@ -339,7 +339,7 @@ case class ScaladocDirective(ctx: Writer.Context)
     if (strictPackageIdent)
       s.replaceAll("(\\b\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)\\.", "$1/")
     else
-      s.replaceAll("(\\b[a-z]\\p{javaJavaIdentifierPart}*)\\.", "$1/")
+      s.replaceAll("(\\b\\p{javaLowerCase}\\p{javaJavaIdentifierPart}*)\\.", "$1/")
 
 }
 
