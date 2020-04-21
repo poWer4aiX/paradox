@@ -40,6 +40,14 @@ class ScaladocDirectiveSpec extends MarkdownBaseSpec {
       html("""<p><a href="http://doc.akka.io/api/akka/2.4.10/akka/s3/ObjectMetadata.html" title="akka.s3.ObjectMetadata"><code>ObjectMetadata</code></a></p>""")
   }
 
+  it should "create accept java identifier characters in package names" in {
+    implicit val context = writerContextWithProperties(
+      "scaladoc.base_url" -> "http://example.org/api/0.1.2/",
+      "scaladoc.strictPackageIdent" -> "true")
+    markdown("@scaladoc[S0meTHing](sOMe.Stränµè.ıÃß.S0meTHing)") shouldEqual
+      html("""<p><a href="http://example.org/api/0.1.2/sOMe/Stränµè/ıÃß/S0meTHing.html" title="sOMe.Stränµè.ıÃß.S0meTHing"><code>S0meTHing</code></a></p>""")
+  }
+
   it should "support 'scaladoc:' as an alternative name" in {
     markdown("@scaladoc:[Model](org.example.Model)") shouldEqual
       html("""<p><a href="http://example.org/api/0.1.2/org/example/Model.html" title="org.example.Model"><code>Model</code></a></p>""")

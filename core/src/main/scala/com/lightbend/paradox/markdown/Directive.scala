@@ -318,6 +318,8 @@ object ApiDocDirective {
 case class ScaladocDirective(ctx: Writer.Context)
   extends ApiDocDirective("scaladoc") {
 
+  protected val strictPackageIdent = variables.getOrElse("scaladoc.strictPackageIdent", "false") == "true"
+
   protected def resolveApiLink(link: String): Url = {
     val levels = link.split("[.]")
     val packages = (1 to levels.init.size).map(levels.take(_).mkString("."))
@@ -329,9 +331,15 @@ case class ScaladocDirective(ctx: Writer.Context)
 
   private def url(link: String, baseUrl: Url): Url = {
     val url = Url(link).base
-    val path = classDotsToDollarDollar(ApiDocDirective.packageDotsToSlash(url.getPath)) + ".html"
+    val path = classDotsToDollarDollar(packageDotsToSlash(url.getPath)) + ".html"
     (baseUrl / path).withFragment(url.getFragment)
   }
+
+  def packageDotsToSlash(s: String) =
+    if (strictPackageIdent)
+      s.replaceAll("(\\b\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)\\.", "$1/")
+    else
+      s.replaceAll("(\\b[a-z]\\p{javaJavaIdentifierPart}*)\\.", "$1/")
 
 }
 
