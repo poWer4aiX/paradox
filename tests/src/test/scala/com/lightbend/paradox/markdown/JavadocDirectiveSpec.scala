@@ -20,8 +20,6 @@ import com.lightbend.paradox.ParadoxException
 
 class JavadocDirectiveSpec extends MarkdownBaseSpec {
 
-  import JavadocDirective._
-
   implicit val context = writerContextWithProperties(
     "javadoc.base_url" -> "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
     "javadoc.link_style" -> "frames",
@@ -29,12 +27,39 @@ class JavadocDirectiveSpec extends MarkdownBaseSpec {
     "javadoc.akka.base_url" -> "http://doc.akka.io/japi/akka/2.4.10",
     "javadoc.akka.http.base_url" -> "http://doc.akka.io/japi/akka-http/10.0.0/index.html",
     "javadoc.root.relative.base_url" -> ".../javadoc/api/",
-    "javadoc.broken.base_url" -> "https://c|"
+    "javadoc.broken.base_url" -> "https://c|",
+    "javadoc.org.example.base_url" -> "http://example.org/api/0.1.2/"
   )
+
+  def renderedMd(url: String, title: String, name: String, prefix: String = "", suffix: String = "") =
+    html(Seq(prefix, """<p><a href="""", url, """" title="""", title, """"><code>""", name, """</code></a></p>""", suffix).mkString(""))
 
   "javadoc directive" should "create links using configured URL templates" in {
     markdown("@javadoc[Publisher](org.reactivestreams.Publisher)") shouldEqual
       html("""<p><a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/?org/reactivestreams/Publisher.html" title="org.reactivestreams.Publisher"><code>Publisher</code></a></p>""")
+  }
+
+  it should "create accept digits in package names" in {
+    markdown("@javadoc[ObjectMetadata](akka.s3.ObjectMetadata)") shouldEqual
+      renderedMd("http://doc.akka.io/japi/akka/2.4.10/?akka/s3/ObjectMetadata.html", "akka.s3.ObjectMetadata", "ObjectMetadata")
+  }
+
+  it should "create accept also non ascii characters (java letters) in package names" in {
+    markdown("@javadoc[S0meTHing](org.example.some.stränµè.ıãß.S0meTHing)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/some/stränµè/ıãß/S0meTHing.html", "org.example.some.stränµè.ıãß.S0meTHing", "S0meTHing")
+  }
+
+  it should "create accept uppercase in package names" in {
+    markdown("@javadoc[S0meTHing](org.example.soME.stränµè.ıãß.S0meTHing)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/soME/stränµè/ıãß/S0meTHing.html", "org.example.soME.stränµè.ıãß.S0meTHing", "S0meTHing")
+  }
+
+  it should "create accept subpackages starting with uppercase" in {
+    implicit val context = writerContextWithProperties(
+      "javadoc.package_name_style" -> "startWithAnycase",
+      "javadoc.org.example.base_url" -> "http://example.org/api/0.1.2/")
+    markdown("@javadoc[S0meTHing](org.example.soME.stränµè.ıãß.你好.S0meTHing)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/soME/stränµè/ıãß/你好/S0meTHing.html", "org.example.soME.stränµè.ıãß.你好.S0meTHing", "S0meTHing")
   }
 
   it should "support 'javadoc:' as an alternative name" in {

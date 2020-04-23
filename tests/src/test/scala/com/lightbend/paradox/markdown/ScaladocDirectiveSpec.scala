@@ -27,8 +27,12 @@ class ScaladocDirectiveSpec extends MarkdownBaseSpec {
     "scaladoc.akka.http.base_url" -> "http://doc.akka.io/api/akka-http/10.0.0",
     "scaladoc.akka.kafka.base_url" -> "https://doc.akka.io/api/alpakka-kafka/current",
     "scaladoc.root.relative.base_url" -> ".../scaladoc/api/",
-    "scaladoc.broken.base_url" -> "https://c|"
+    "scaladoc.broken.base_url" -> "https://c|",
+    "scaladoc.org.example.base_url" -> "http://example.org/api/0.1.2/"
   )
+
+  def renderedMd(url: String, title: String, name: String, prefix: String = "", suffix: String = "") =
+    html(Seq(prefix, """<p><a href="""", url, """" title="""", title, """"><code>""", name, """</code></a></p>""", suffix).mkString(""))
 
   "Scaladoc directive" should "create links using configured URL templates" in {
     markdown("@scaladoc[Model](org.example.Model)") shouldEqual
@@ -38,6 +42,24 @@ class ScaladocDirectiveSpec extends MarkdownBaseSpec {
   it should "create accept digits in package names" in {
     markdown("@scaladoc[ObjectMetadata](akka.s3.ObjectMetadata)") shouldEqual
       html("""<p><a href="http://doc.akka.io/api/akka/2.4.10/akka/s3/ObjectMetadata.html" title="akka.s3.ObjectMetadata"><code>ObjectMetadata</code></a></p>""")
+  }
+
+  it should "create accept also non ascii characters (java letters) in package names" in {
+    markdown("@scaladoc[S0meTHing](org.example.some.stränµè.ıãß.S0meTHing)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/some/stränµè/ıãß/S0meTHing.html", "org.example.some.stränµè.ıãß.S0meTHing", "S0meTHing")
+  }
+
+  it should "create accept uppercase in package names" in {
+    markdown("@scaladoc[S0meTHing](org.example.soME.stränµè.ıãß.S0meTHing)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/soME/stränµè/ıãß/S0meTHing.html", "org.example.soME.stränµè.ıãß.S0meTHing", "S0meTHing")
+  }
+
+  it should "create accept subpackages starting with uppercase" in {
+    implicit val context = writerContextWithProperties(
+      "scaladoc.package_name_style" -> "startWithAnycase",
+      "scaladoc.org.example.base_url" -> "http://example.org/api/0.1.2/")
+    markdown("@scaladoc[S0meTHing](org.example.soME.stränµè.ıãß.你好.S0meTHing)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/soME/stränµè/ıãß/你好/S0meTHing.html", "org.example.soME.stränµè.ıãß.你好.S0meTHing", "S0meTHing")
   }
 
   it should "support 'scaladoc:' as an alternative name" in {
