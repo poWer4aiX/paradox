@@ -118,19 +118,21 @@ class JavadocDirectiveSpec extends MarkdownBaseSpec {
   }
 
   it should "correctly link to an inner JRE class" in {
-    url(
-      "java.util.concurrent.Flow.Subscriber",
-      Url("https://docs.oracle.com/en/java/javase/11/docs/api/java.base/"),
-      LinkStyleDirect
-    ) should be(Url("https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/Flow.Subscriber.html"))
+    val ctx = context.andThen(c => c.copy(properties = c.properties
+      .updated("javadoc.java.link_style", "direct")
+      .updated("javadoc.java.base_url", "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/")
+    ))
+    markdown("@javadoc:[Flow.Subscriber](java.util.concurrent.Flow.Subscriber)")(ctx) shouldEqual
+      html("""<p><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/Flow.Subscriber.html" title="java.util.concurrent.Flow.Subscriber"><code>Flow.Subscriber</code></a></p>""")
   }
 
   it should "correctly link to an inner Akka class" in {
-    url(
-      "akka.actor.testkit.typed.Effect.MessageAdapter",
-      Url("https://doc.akka.io/japi/akka/current/"),
-      LinkStyleDirect
-    ) should be(Url("https://doc.akka.io/japi/akka/current/akka/actor/testkit/typed/Effect.MessageAdapter.html"))
+    val ctx = context.andThen(c => c.copy(properties = c.properties
+      .updated("javadoc.akka.link_style", "direct")
+      .updated("javadoc.akka.base_url", "https://doc.akka.io/japi/akka/current/")
+    ))
+    markdown("@javadoc:[Effect.MessageAdapter](akka.actor.testkit.typed.Effect.MessageAdapter)")(ctx) shouldEqual
+      html("""<p><a href="https://doc.akka.io/japi/akka/current/akka/actor/testkit/typed/Effect.MessageAdapter.html" title="akka.actor.testkit.typed.Effect.MessageAdapter"><code>Effect.MessageAdapter</code></a></p>""")
   }
 
 }

@@ -348,15 +348,6 @@ object JavadocDirective {
 
   final val JavadocLinkStyleProperty = raw"""javadoc\.(.*).link_style""".r
 
-  private[markdown] def url(link: String, baseUrl: Url, linkStyle: LinkStyle): Url = {
-    val url = Url(link).base
-    val path = ApiDocDirective.packageDotsToSlash(url.getPath) + ".html"
-    linkStyle match {
-      case LinkStyleFrames => baseUrl.withEndingSlash.withQuery(path).withFragment(url.getFragment)
-      case LinkStyleDirect => (baseUrl / path).withFragment(url.getFragment)
-    }
-  }
-
 }
 
 case class JavadocDirective(ctx: Writer.Context)
@@ -379,6 +370,15 @@ case class JavadocDirective(ctx: Writer.Context)
     val linkStyle = packagesDeepestFirst.collectFirst(packageLinkStyle).getOrElse(rootLinkStyle)
     url(link, baseUrl, linkStyle)
 
+  }
+
+  private[markdown] def url(link: String, baseUrl: Url, linkStyle: LinkStyle): Url = {
+    val url = Url(link).base
+    val path = ApiDocDirective.packageDotsToSlash(url.getPath) + ".html"
+    linkStyle match {
+      case LinkStyleFrames => baseUrl.withEndingSlash.withQuery(path).withFragment(url.getFragment)
+      case LinkStyleDirect => (baseUrl / path).withFragment(url.getFragment)
+    }
   }
 }
 
