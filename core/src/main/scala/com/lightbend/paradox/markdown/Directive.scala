@@ -313,13 +313,13 @@ abstract class ApiDocDirective(name: String)
 object ApiDocDirective {
   /**
    * Converts package dot notation to a path, separated by '/'
-   * Allow all valid java characters and java numbers to be used, according to the java lang spec. In order to
-   * be allow to convert `package.Outer.Inner` in scala to the `packge/Outer$$Inner`, `strictPackageIdent` has
-   * be set to `true`.
+   * Allow all valid java characters and java numbers to be used, according to the java lang spec.
+   *
    * @param s package or full qualified class name to be converted.
-   * @param packageNameStyle  `startWithLowercase` requires subpackages to start with a lowercase character
-   *                          (which is the default to be backwards compatible).
-   *                          `startWithAnycase` allows packages to start with uppercase also.
+   * @param packageNameStyle Setting `startWithLowercase`` will get it wrong when a package name
+   *                         starts with an uppercase letter or when an inner class starts with
+   *                         a lowercase character, while `startWithAnycase` will derive the wrong
+   *                         path whenever an inner class is encountered.
    * @return Resulting path.
    */
   def packageDotsToSlash(s: String, packageNameStyle: String = "startWithLowercase") =
