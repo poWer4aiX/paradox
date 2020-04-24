@@ -322,7 +322,7 @@ object ApiDocDirective {
    *                         path whenever an inner class is encountered.
    * @return Resulting path.
    */
-  def packageDotsToSlash(s: String, packageNameStyle: String = "startWithLowercase") =
+  def packageDotsToSlash(s: String, packageNameStyle: String) =
     if (packageNameStyle == "startWithAnycase")
       s.replaceAll("(\\b\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)\\.", "$1/")
     else
