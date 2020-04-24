@@ -167,7 +167,9 @@ reference is resolved incorrectly. This can be fixed by configuring the properti
 `javadoc.package_name_style` and set it to `startWithAnycase`.
 The directive will match the link text with the longest common package prefix
 and use the default style as a fall-back if nothing else matches. Keep in mind
-that the `OuterClass.InnerClass` notation is no longer working then.
+that the `OuterClass.InnerClass` notation is no longer working then. In this case
+the class has to be referenced as `OuterClass$$InnerClass` which is being resolved
+back to the `.`-notation.
 
 For example, given:
 
@@ -181,6 +183,8 @@ paradoxProperties in Compile ++= Map(
 ```markdown
  @javadoc[SomeClass](com.example.Some.Library.SomeClass)
  @javadoc[Outer.Inner](com.example.Some.Library.Outer$$Inner)
+ @javadoc[outer.Inner](com.example.Some.Library.outer$$Inner)
+ @javadoc[Outer.inner](com.example.Some.Library.Outer$$inner)
  @javadoc[Consumer.Control](akka.kafka.scaladsl.Consumer.Control)
 ```
 
