@@ -407,9 +407,11 @@ case class JavadocDirective(ctx: Writer.Context)
 
   }
 
+  private def dollarDollarToClassDot(s: String) = s.replaceAll("\\$\\$", ".")
+
   private[markdown] def url(link: String, baseUrl: Url, linkStyle: LinkStyle, packageNameStyle: String): Url = {
     val url = Url(link).base
-    val path = ApiDocDirective.packageDotsToSlash(url.getPath, packageNameStyle) + ".html"
+    val path = dollarDollarToClassDot(ApiDocDirective.packageDotsToSlash(url.getPath, packageNameStyle)) + ".html"
     linkStyle match {
       case LinkStyleFrames => baseUrl.withEndingSlash.withQuery(path).withFragment(url.getFragment)
       case LinkStyleDirect => (baseUrl / path).withFragment(url.getFragment)

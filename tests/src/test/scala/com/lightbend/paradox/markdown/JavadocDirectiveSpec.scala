@@ -49,6 +49,11 @@ class JavadocDirectiveSpec extends MarkdownBaseSpec {
       renderedMd("http://example.org/api/0.1.2/?org/example/some/stränµè/ıãß/S0meTHing.html", "org.example.some.stränµè.ıãß.S0meTHing", "S0meTHing")
   }
 
+  it should "create accept also non ascii characters (java letters) in class names" in {
+    markdown("@javadoc[Grüße](org.example.some.Grüße)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/some/Grüße.html", "org.example.some.Grüße", "Grüße")
+  }
+
   it should "create accept uppercase in package names" in {
     markdown("@javadoc[S0meTHing](org.example.soME.stränµè.ıãß.S0meTHing)") shouldEqual
       renderedMd("http://example.org/api/0.1.2/?org/example/soME/stränµè/ıãß/S0meTHing.html", "org.example.soME.stränµè.ıãß.S0meTHing", "S0meTHing")
@@ -158,6 +163,27 @@ class JavadocDirectiveSpec extends MarkdownBaseSpec {
     ))
     markdown("@javadoc:[Effect.MessageAdapter](akka.actor.testkit.typed.Effect.MessageAdapter)")(ctx) shouldEqual
       html("""<p><a href="https://doc.akka.io/japi/akka/current/akka/actor/testkit/typed/Effect.MessageAdapter.html" title="akka.actor.testkit.typed.Effect.MessageAdapter"><code>Effect.MessageAdapter</code></a></p>""")
+  }
+
+  it should "correctly link to an inner class if a subpackage starts with an uppercase character" in {
+    val ctx = context.andThen(c => c.copy(properties = c.properties
+      .updated("javadoc.org.example.package_name_style", "startWithAnycase")
+    ))
+    markdown("@javadoc:[Outer.Inner](org.example.Lib.Outer$$Inner)")(ctx) shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/Lib/Outer.Inner.html", "org.example.Lib.Outer.Inner", "Outer.Inner")
+  }
+
+  it should "correctly link to an inner class if the outer class starts with a lowercase character" in {
+    markdown("@javadoc:[outer.Inner](org.example.lib.outer$$Inner)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/lib/outer.Inner.html", "org.example.lib.outer.Inner", "outer.Inner")
+  }
+
+  it should "correctly link to an inner class if the inner class starts with a lowercase character" in {
+    val ctx = context.andThen(c => c.copy(properties = c.properties
+      .updated("javadoc.org.example.package_name_style", "startWithAnycase")
+    ))
+    markdown("@javadoc:[Outer.inner](org.example.lib.Outer$$inner)")(ctx) shouldEqual
+      renderedMd("http://example.org/api/0.1.2/?org/example/lib/Outer.inner.html", "org.example.lib.Outer.inner", "Outer.inner")
   }
 
 }

@@ -49,6 +49,11 @@ class ScaladocDirectiveSpec extends MarkdownBaseSpec {
       renderedMd("http://example.org/api/0.1.2/org/example/some/stränµè/ıãß/S0meTHing.html", "org.example.some.stränµè.ıãß.S0meTHing", "S0meTHing")
   }
 
+  it should "create accept also non ascii characters (java letters) in class names" in {
+    markdown("@scaladoc[Grüße](org.example.some.Grüße)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/some/Grüße.html", "org.example.some.Grüße", "Grüße")
+  }
+
   it should "create accept uppercase in package names" in {
     markdown("@scaladoc[S0meTHing](org.example.soME.stränµè.ıãß.S0meTHing)") shouldEqual
       renderedMd("http://example.org/api/0.1.2/org/example/soME/stränµè/ıãß/S0meTHing.html", "org.example.soME.stränµè.ıãß.S0meTHing", "S0meTHing")
@@ -93,6 +98,27 @@ class ScaladocDirectiveSpec extends MarkdownBaseSpec {
   it should "handle inner classes correctly" in {
     markdown("@scaladoc[Consumer.Control](akka.kafka.scaladsl.Consumer.Control)") shouldEqual
       html("""<p><a href="https://doc.akka.io/api/alpakka-kafka/current/akka/kafka/scaladsl/Consumer$$Control.html" title="akka.kafka.scaladsl.Consumer.Control"><code>Consumer.Control</code></a></p>""")
+  }
+
+  it should "handle inner classes in $$ notation correctly if a subpackage starts with an uppercase character" in {
+    val ctx = context.andThen(c => c.copy(properties = c.properties
+      .updated("scaladoc.org.example.package_name_style", "startWithAnycase")
+    ))
+    markdown("@scaladoc:[Outer.Inner](org.example.Lib.Outer$$Inner)")(ctx) shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/Lib/Outer$$Inner.html", "org.example.Lib.Outer.Inner", "Outer.Inner")
+  }
+
+  it should "handle inner classes in $$ notation correctly if the outer class starts with a lowercase character" in {
+    markdown("@scaladoc:[outer.Inner](org.example.lib.outer$$Inner)") shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/lib/outer$$Inner.html", "org.example.lib.outer.Inner", "outer.Inner")
+  }
+
+  it should "handle inner classes in $$ notation correctly if the inner class starts with a lowercase character" in {
+    val ctx = context.andThen(c => c.copy(properties = c.properties
+      .updated("scaladoc.org.example.package_name_style", "startWithAnycase")
+    ))
+    markdown("@scaladoc:[Outer.inner](org.example.lib.Outer$$inner)")(ctx) shouldEqual
+      renderedMd("http://example.org/api/0.1.2/org/example/lib/Outer$$inner.html", "org.example.lib.Outer.inner", "Outer.inner")
   }
 
   it should "handle inner classes in $$ notation" in {
