@@ -322,7 +322,7 @@ object ApiDocDirective {
    *                          `startWithAnycase` allows packages to start with uppercase also.
    * @return Resulting path.
    */
-  def packageDotsToSlash(s: String, packageNameStyle: String = "startWithLowercase") =
+  def packageDotsToSlash(s: String, packageNameStyle: String) =
     if (packageNameStyle == "startWithAnycase")
       s.replaceAll("(\\b\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)\\.", "$1/")
     else
